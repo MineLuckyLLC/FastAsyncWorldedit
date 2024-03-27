@@ -94,25 +94,25 @@ subprojects {
     }
 
     repositories {
-        maven {url "https://mvnrepository.com/artifact/"}
+        maven {url = "https://mvnrepository.com/artifact/"}
         mavenCentral()
-        maven {url "http://repo.dmulloy2.net/content/groups/public/"}
-        maven {url "https://repo.destroystokyo.com/repository/maven-public//"}
-        //maven {url "http://ci.emc.gs/nexus/content/groups/aikar/" }
-        maven {url "https://ci.athion.net/plugin/repository/tools/"}
+        maven {url = "http://repo.dmulloy2.net/content/groups/public/"}
+        maven {url = "https://repo.destroystokyo.com/repository/maven-public//"}
+        maven {url = "https://repo.songoda.com/repository/public/" }
+        maven {url = "https://ci.athion.net/plugin/repository/tools/"}
         mavenLocal()
-        maven {url "https://hub.spigotmc.org/nexus/content/groups/public/"}
-        maven {url "https://maven.enginehub.org/repo/"}
-        maven {url "https://repo.maven.apache.org/maven2"}
-        maven {url "http://ci.frostcast.net/plugin/repository/everything"}
-        maven {url "http://repo.spongepowered.org/maven"}
-        maven {url "http://dl.bintray.com/tastybento/maven-repo"}
-        maven {url "https://repo.inventivetalent.org/content/groups/public/"}
-        maven {url "https://store.ttyh.ru/libraries/"}
-        maven {url "https://repo.dmulloy2.net/nexus/repository/public/"}
-        maven {url "http://maven.elmakers.com/repository/"}
-        maven {url "https://ci.ender.zone/plugin/repository/everything/"}
-        maven {url "https://plotsquared.com/mvn/"}
+        maven {url = "https://hub.spigotmc.org/nexus/content/groups/public/"}
+        maven {url = "https://maven.enginehub.org/repo/"}
+        maven {url = "https://repo.maven.apache.org/maven2"}
+        maven {url = "http://ci.frostcast.net/plugin/repository/everything"}
+        maven {url = "http://repo.spongepowered.org/maven"}
+        maven {url = "http://dl.bintray.com/tastybento/maven-repo"}
+        maven {url = "https://repo.inventivetalent.org/content/groups/public/"}
+        maven {url = "https://store.ttyh.ru/libraries/"}
+        maven {url = "https://repo.dmulloy2.net/nexus/repository/public/"}
+        maven {url = "http://maven.elmakers.com/repository/"}
+        maven {url = "https://ci.ender.zone/plugin/repository/everything/"}
+        maven {url = "https://repo.minebench.de/"}
     }
 }
 task aggregatedJavadocs(type: Javadoc, description: 'Generate javadocs from all child projects as if it was a single project', group: 'Documentation') {

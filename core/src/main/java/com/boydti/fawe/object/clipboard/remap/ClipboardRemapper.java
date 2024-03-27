@@ -1,11 +1,11 @@
 package com.boydti.fawe.object.clipboard.remap;
 
 import com.boydti.fawe.FaweCache;
+import com.boydti.fawe.util.MathMan;
 import com.google.common.io.Resources;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.intellectualcrafters.plot.util.MathMan;
 import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.WorldEditException;
@@ -15,14 +15,11 @@ import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.registry.BundledBlockData;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ClipboardRemapper {
     private final RemapPlatform from;

@@ -4,6 +4,12 @@ dependencies {
 
 clean { delete "../target" }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs += [
+            "-Xlint:none"
+    ]
+}
+
 processResources {
     from('src/main/resources') {
         include 'plugin.yml'

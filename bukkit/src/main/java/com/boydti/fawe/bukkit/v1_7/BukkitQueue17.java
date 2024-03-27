@@ -14,42 +14,7 @@ import com.sk89q.jnbt.CompoundTag;
 import com.sk89q.jnbt.StringTag;
 import com.sk89q.jnbt.Tag;
 import com.sk89q.worldedit.world.biome.BaseBiome;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import net.minecraft.server.v1_7_R4.Block;
-import net.minecraft.server.v1_7_R4.Chunk;
-import net.minecraft.server.v1_7_R4.ChunkCoordIntPair;
-import net.minecraft.server.v1_7_R4.ChunkPosition;
-import net.minecraft.server.v1_7_R4.ChunkSection;
-import net.minecraft.server.v1_7_R4.Entity;
-import net.minecraft.server.v1_7_R4.EntityPlayer;
-import net.minecraft.server.v1_7_R4.EntityTracker;
-import net.minecraft.server.v1_7_R4.EntityTypes;
-import net.minecraft.server.v1_7_R4.EnumDifficulty;
-import net.minecraft.server.v1_7_R4.EnumGamemode;
-import net.minecraft.server.v1_7_R4.EnumSkyBlock;
-import net.minecraft.server.v1_7_R4.LongHashMap;
-import net.minecraft.server.v1_7_R4.MinecraftServer;
-import net.minecraft.server.v1_7_R4.NBTTagCompound;
-import net.minecraft.server.v1_7_R4.NibbleArray;
-import net.minecraft.server.v1_7_R4.PacketPlayOutMapChunk;
-import net.minecraft.server.v1_7_R4.PlayerChunkMap;
-import net.minecraft.server.v1_7_R4.ServerNBTManager;
-import net.minecraft.server.v1_7_R4.TileEntity;
-import net.minecraft.server.v1_7_R4.WorldManager;
-import net.minecraft.server.v1_7_R4.WorldServer;
-import net.minecraft.server.v1_7_R4.WorldSettings;
-import net.minecraft.server.v1_7_R4.WorldType;
+import net.minecraft.server.v1_7_R4.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -60,6 +25,10 @@ import org.bukkit.craftbukkit.v1_7_R4.CraftWorld;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.generator.ChunkGenerator;
+
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.*;
 
 public class BukkitQueue17 extends BukkitQueue_0<net.minecraft.server.v1_7_R4.Chunk, ChunkSection[], ChunkSection> {
 
@@ -518,11 +487,11 @@ public class BukkitQueue17 extends BukkitQueue_0<net.minecraft.server.v1_7_R4.Ch
                     }
                     for (EntityPlayer player : players) {
                         if (mask == 0 || mask == 65535 && hasEntities(nmsChunk)) {
-                            PacketPlayOutMapChunk packet = new PacketPlayOutMapChunk(nmsChunk, false, 65280);
+                            PacketPlayOutMapChunk packet = new PacketPlayOutMapChunk();
                             player.playerConnection.sendPacket(packet);
                             mask = 255;
                         }
-                        PacketPlayOutMapChunk packet = new PacketPlayOutMapChunk(nmsChunk, false, mask);
+                        PacketPlayOutMapChunk packet = new PacketPlayOutMapChunk();
                         player.playerConnection.sendPacket(packet);
                     }
                     if (empty) {

@@ -6,15 +6,14 @@ import com.boydti.fawe.config.Commands;
 import com.boydti.fawe.config.Settings;
 import com.boydti.fawe.object.FawePlayer;
 import com.boydti.fawe.object.brush.visualization.VisualQueue;
-import com.boydti.fawe.regions.general.plot.PlotSquaredFeature;
 import com.boydti.fawe.util.*;
 import com.boydti.fawe.util.chat.ChatManager;
 import com.boydti.fawe.util.chat.PlainChatManager;
 import com.boydti.fawe.util.cui.CUI;
 import com.boydti.fawe.util.metrics.BStats;
 import com.sk89q.jnbt.*;
-import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BlockData;
@@ -76,6 +75,12 @@ import com.sk89q.worldedit.util.formatting.component.CommandUsageBox;
 import com.sk89q.worldedit.util.formatting.component.MessageBox;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.registry.BundledBlockData;
+
+import javax.annotation.Nullable;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.Notification;
+import javax.management.NotificationEmitter;
+import javax.management.NotificationListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -87,12 +92,6 @@ import java.lang.management.MemoryUsage;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.Notification;
-import javax.management.NotificationEmitter;
-import javax.management.NotificationListener;
-
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -280,9 +279,7 @@ public class Fawe {
                 transformParser = new DefaultTransformParser(getWorldEdit());
                 visualQueue = new VisualQueue(3);
                 WEManager.IMP.managers.addAll(Fawe.this.IMP.getMaskManagers());
-                WEManager.IMP.managers.add(new PlotSquaredFeature());
-                Fawe.debug("Plugin 'PlotSquared' found. Using it now.");
-            } catch (Throwable e) {}
+            } catch (Throwable ignored) {}
         }, 0);
 
         TaskManager.IMP.repeat(timer, 1);

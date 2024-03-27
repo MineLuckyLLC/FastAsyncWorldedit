@@ -36,7 +36,6 @@ import com.boydti.fawe.object.extent.ResettableExtent;
 import com.boydti.fawe.util.*;
 import com.boydti.fawe.util.cui.CUI;
 import com.boydti.fawe.wrappers.WorldWrapper;
-import com.intellectualcrafters.plot.object.PlotArea;
 import com.sk89q.jchronic.Chronic;
 import com.sk89q.jchronic.Options;
 import com.sk89q.jchronic.utils.Span;
@@ -61,12 +60,12 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.session.request.Request;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.snapshot.Snapshot;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -1029,7 +1028,6 @@ public class LocalSession implements TextureHolder {
      *
      * @param item the item type ID
      * @return the tool, or {@code null}
-     * @throws InvalidToolBindException if the item can't be bound to that item
      */
     @Deprecated
     public BrushTool getBrushTool(int item) throws InvalidToolBindException {
@@ -1071,7 +1069,6 @@ public class LocalSession implements TextureHolder {
      *
      * @param item the item type ID
      * @param tool the tool to set, which can be {@code null}
-     * @throws InvalidToolBindException if the item can't be bound to that item
      */
     @Deprecated
     public void setTool(int item, @Nullable Tool tool) throws InvalidToolBindException {

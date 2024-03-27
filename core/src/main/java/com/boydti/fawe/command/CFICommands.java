@@ -6,25 +6,11 @@ import com.boydti.fawe.config.BBC;
 import com.boydti.fawe.config.Commands;
 import com.boydti.fawe.jnbt.anvil.HeightMapMCAGenerator;
 import com.boydti.fawe.object.FawePlayer;
-import com.boydti.fawe.object.RunnableVal;
 import com.boydti.fawe.object.clipboard.MultiClipboardHolder;
 import com.boydti.fawe.object.pattern.PatternExtent;
 import com.boydti.fawe.util.*;
 import com.boydti.fawe.util.chat.Message;
 import com.boydti.fawe.util.image.ImageUtil;
-import com.intellectualcrafters.plot.PS;
-import com.intellectualcrafters.plot.commands.Auto;
-import com.intellectualcrafters.plot.config.C;
-import com.intellectualcrafters.plot.config.Settings;
-import com.intellectualcrafters.plot.database.DBFunc;
-import com.intellectualcrafters.plot.object.Plot;
-import com.intellectualcrafters.plot.object.PlotArea;
-import com.intellectualcrafters.plot.object.PlotId;
-import com.intellectualcrafters.plot.object.PlotPlayer;
-import com.intellectualcrafters.plot.object.worlds.PlotAreaManager;
-import com.intellectualcrafters.plot.object.worlds.SinglePlotArea;
-import com.intellectualcrafters.plot.object.worlds.SinglePlotAreaManager;
-import com.intellectualcrafters.plot.util.MathMan;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandException;
@@ -51,6 +37,8 @@ import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BaseBiome;
 import com.sk89q.worldedit.world.registry.BundledBlockData;
 import com.sk89q.worldedit.world.registry.WorldData;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.ByteArrayOutputStream;
@@ -64,7 +52,6 @@ import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import javax.imageio.ImageIO;
 
 @Command(aliases = {"/cfi"}, desc = "Create a world from images: [More Info](https://git.io/v5iDy)")
 public class CFICommands extends MethodCommands {
@@ -82,7 +69,9 @@ public class CFICommands extends MethodCommands {
     }
 
     private File getFolder(String worldName) {
-        return new File(PS.imp().getWorldContainer(), worldName + File.separator + "region");
+        return new File(
+//                PS.imp().getWorldContainer(),
+                worldName + File.separator + "region");
     }
 
     @Command(
@@ -168,22 +157,22 @@ public class CFICommands extends MethodCommands {
         fp.sendMessage(BBC.getPrefix() + "Cancelled!");
     }
 
-    @Deprecated
-    public static void autoClaimFromDatabase(PlotPlayer player, PlotArea area, PlotId start, com.intellectualcrafters.plot.object.RunnableVal<Plot> whenDone) {
-        final Plot plot = area.getNextFreePlot(player, start);
-        if (plot == null) {
-            whenDone.run(null);
-            return;
-        }
-        whenDone.value = plot;
-        plot.owner = player.getUUID();
-        DBFunc.createPlotSafe(plot, whenDone, new Runnable() {
-            @Override
-            public void run() {
-                autoClaimFromDatabase(player, area, plot.getId(), whenDone);
-            }
-        });
-    }
+//    @Deprecated
+//    public static void autoClaimFromDatabase(PlotPlayer player, PlotArea area, PlotId start, com.intellectualcrafters.plot.object.RunnableVal<Plot> whenDone) {
+//        final Plot plot = area.getNextFreePlot(player, start);
+//        if (plot == null) {
+//            whenDone.run(null);
+//            return;
+//        }
+//        whenDone.value = plot;
+//        plot.owner = player.getUUID();
+//        DBFunc.createPlotSafe(plot, whenDone, new Runnable() {
+//            @Override
+//            public void run() {
+//                autoClaimFromDatabase(player, area, plot.getId(), whenDone);
+//            }
+//        });
+//    }
 
     @Command(
             aliases = {"done", "create"},
@@ -194,59 +183,59 @@ public class CFICommands extends MethodCommands {
     public void done(FawePlayer fp) throws ParameterException, IOException {
         CFISettings settings = assertSettings(fp);
 
-        PlotAreaManager manager = PS.get().getPlotAreaManager();
-        if (manager instanceof SinglePlotAreaManager) {
-            SinglePlotAreaManager sManager = (SinglePlotAreaManager) manager;
-            SinglePlotArea area = sManager.getArea();
-            PlotPlayer player = PlotPlayer.wrap(fp.parent);
-
-            fp.sendMessage(BBC.getPrefix() + "Claiming world");
-            Plot plot = TaskManager.IMP.sync(new RunnableVal<Plot>() {
-                @Override
-                public void run(Plot o) {
-                    int currentPlots = Settings.Limit.GLOBAL ? player.getPlotCount() : player.getPlotCount(area.worldname);
-                    int diff = player.getAllowedPlots() - currentPlots;
-                    if (diff < 1) {
-                        C.CANT_CLAIM_MORE_PLOTS_NUM.send(player, -diff);
-                        return;
-                    }
-
-                    if (area.getMeta("lastPlot") == null) {
-                        area.setMeta("lastPlot", new PlotId(0, 0));
-                    }
-                    PlotId lastId = (PlotId) area.getMeta("lastPlot");
-                    while (true) {
-                        lastId = Auto.getNextPlotId(lastId, 1);
-                        if (area.canClaim(player, lastId, lastId)) {
-                            break;
-                        }
-                    }
-                    area.setMeta("lastPlot", lastId);
-                    this.value = area.getPlot(lastId);
-                    this.value.setOwner(player.getUUID());
-                }
-            });
-            if (plot == null) return;
-
-            File folder = getFolder(plot.getWorldName());
-            HeightMapMCAGenerator generator = settings.getGenerator();
-            generator.setFolder(folder);
-
-            fp.sendMessage(BBC.getPrefix() + "Generating");
-            generator.generate();
-            generator.setPacketViewer(null);
-            generator.setImageViewer(null);
-            settings.remove();
-            fp.sendMessage(BBC.getPrefix() + "Done!");
-            TaskManager.IMP.sync(new RunnableVal<Object>() {
-                @Override
-                public void run(Object value) {
-                    plot.teleportPlayer(player);
-                }
-            });
-        } else {
-            fp.sendMessage(BBC.getPrefix() + "Must have the `worlds` component enabled in the PlotSquared config.yml");
-        }
+//        PlotAreaManager manager = PS.get().getPlotAreaManager();
+//        if (manager instanceof SinglePlotAreaManager) {
+//            SinglePlotAreaManager sManager = (SinglePlotAreaManager) manager;
+//            SinglePlotArea area = sManager.getArea();
+//            PlotPlayer player = PlotPlayer.wrap(fp.parent);
+//
+//            fp.sendMessage(BBC.getPrefix() + "Claiming world");
+//            Plot plot = TaskManager.IMP.sync(new RunnableVal<Plot>() {
+//                @Override
+//                public void run(Plot o) {
+//                    int currentPlots = Settings.Limit.GLOBAL ? player.getPlotCount() : player.getPlotCount(area.worldname);
+//                    int diff = player.getAllowedPlots() - currentPlots;
+//                    if (diff < 1) {
+//                        C.CANT_CLAIM_MORE_PLOTS_NUM.send(player, -diff);
+//                        return;
+//                    }
+//
+//                    if (area.getMeta("lastPlot") == null) {
+//                        area.setMeta("lastPlot", new PlotId(0, 0));
+//                    }
+//                    PlotId lastId = (PlotId) area.getMeta("lastPlot");
+//                    while (true) {
+//                        lastId = Auto.getNextPlotId(lastId, 1);
+//                        if (area.canClaim(player, lastId, lastId)) {
+//                            break;
+//                        }
+//                    }
+//                    area.setMeta("lastPlot", lastId);
+//                    this.value = area.getPlot(lastId);
+//                    this.value.setOwner(player.getUUID());
+//                }
+//            });
+//            if (plot == null) return;
+//
+//            File folder = getFolder(plot.getWorldName());
+//            HeightMapMCAGenerator generator = settings.getGenerator();
+//            generator.setFolder(folder);
+//
+//            fp.sendMessage(BBC.getPrefix() + "Generating");
+//            generator.generate();
+//            generator.setPacketViewer(null);
+//            generator.setImageViewer(null);
+//            settings.remove();
+//            fp.sendMessage(BBC.getPrefix() + "Done!");
+//            TaskManager.IMP.sync(new RunnableVal<Object>() {
+//                @Override
+//                public void run(Object value) {
+//                    plot.teleportPlayer(player);
+//                }
+//            });
+//        } else {
+//            fp.sendMessage(BBC.getPrefix() + "Must have the `worlds` component enabled in the PlotSquared config.yml");
+//        }
     }
 
     @Command(

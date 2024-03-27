@@ -5,55 +5,47 @@ import com.boydti.fawe.jnbt.anvil.MCAChunk;
 import com.boydti.fawe.jnbt.anvil.MCAFile;
 import com.boydti.fawe.object.RunnableVal4;
 import com.boydti.fawe.object.collection.LongHashSet;
-import com.intellectualcrafters.plot.PS;
-import com.intellectualcrafters.plot.generator.HybridGen;
-import com.intellectualcrafters.plot.generator.HybridPlotWorld;
-import com.intellectualcrafters.plot.generator.IndependentPlotGenerator;
-import com.intellectualcrafters.plot.object.Location;
-import com.intellectualcrafters.plot.object.Plot;
-import com.intellectualcrafters.plot.object.PlotArea;
-import com.intellectualcrafters.plot.util.expiry.ExpireManager;
 import com.sk89q.worldedit.world.World;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
 import java.util.concurrent.ForkJoinPool;
 
 public class PlotTrimFilter extends DeleteUninhabitedFilter {
-    private final HybridPlotWorld hpw;
-    private final HybridGen hg;
+//    private final HybridPlotWorld hpw;
+//    private final HybridGen hg;
     private final MCAChunk reference;
     private final LongHashSet occupiedRegions;
     private final LongHashSet unoccupiedChunks;
     private boolean referenceIsVoid;
 
-    public static boolean shouldSuggest(PlotArea area) {
-        IndependentPlotGenerator gen = area.getGenerator();
-        if (area instanceof HybridPlotWorld && gen instanceof HybridGen) {
-            HybridPlotWorld hpw = (HybridPlotWorld) area;
-            return hpw.PLOT_BEDROCK && !hpw.PLOT_SCHEMATIC && hpw.MAIN_BLOCK.length == 1 && hpw.TOP_BLOCK.length == 1;
-        }
-        return false;
-    }
+//    public static boolean shouldSuggest(PlotArea area) {
+//        IndependentPlotGenerator gen = area.getGenerator();
+//        if (area instanceof HybridPlotWorld && gen instanceof HybridGen) {
+//            HybridPlotWorld hpw = (HybridPlotWorld) area;
+//            return hpw.PLOT_BEDROCK && !hpw.PLOT_SCHEMATIC && hpw.MAIN_BLOCK.length == 1 && hpw.TOP_BLOCK.length == 1;
+//        }
+//        return false;
+//    }
 
     public PlotTrimFilter(World world, long fileDuration, long inhabitedTicks, long chunkInactivity) {
         super(fileDuration, inhabitedTicks, chunkInactivity);
         Fawe.debug("Initializing Plot trim...");
 
         String worldName = Fawe.imp().getWorldName(world);
-        PlotArea area = PS.get().getPlotAreaByString(worldName);
-        IndependentPlotGenerator gen = area.getGenerator();
-        if (!(area instanceof HybridPlotWorld) || !(gen instanceof HybridGen)) {
-            throw new UnsupportedOperationException("Trim does not support non hybrid plot worlds");
-        }
-        this.hg = (HybridGen) gen;
-        this.hpw = (HybridPlotWorld) area;
-        if (hpw.PLOT_SCHEMATIC || hpw.MAIN_BLOCK.length != 1 || hpw.TOP_BLOCK.length != 1) {
-            throw new UnsupportedOperationException("WIP - will implement later");
-        }
+//        PlotArea area = PS.get().getPlotAreaByString(worldName);
+//        IndependentPlotGenerator gen = area.getGenerator();
+//        if (!(area instanceof HybridPlotWorld) || !(gen instanceof HybridGen)) {
+//            throw new UnsupportedOperationException("Trim does not support non hybrid plot worlds");
+//        }
+//        this.hg = (HybridGen) gen;
+//        this.hpw = (HybridPlotWorld) area;
+//        if (hpw.PLOT_SCHEMATIC || hpw.MAIN_BLOCK.length != 1 || hpw.TOP_BLOCK.length != 1) {
+//            throw new UnsupportedOperationException("WIP - will implement later");
+//        }
         this.occupiedRegions = new LongHashSet();
         this.unoccupiedChunks = new LongHashSet();
 
@@ -65,54 +57,54 @@ public class PlotTrimFilter extends DeleteUninhabitedFilter {
 
     private MCAChunk calculateReference() {
         MCAChunk reference = new MCAChunk(null, 0, 0);
-        if (hpw.PLOT_BEDROCK) {
-            reference.fillCuboid(0, 15, 0, 0, 0, 15, 7, (byte) 0);
-        } else if (hpw.MAIN_BLOCK[0].id == 0 && hpw.TOP_BLOCK[0].id == 0) {
-            referenceIsVoid = true;
-        }
-        reference.fillCuboid(0, 15, 1, hpw.PLOT_HEIGHT - 1, 0, 15, hpw.MAIN_BLOCK[0].id, (byte) 0);
-        reference.fillCuboid(0, 15, hpw.PLOT_HEIGHT, hpw.PLOT_HEIGHT, 0, 15, hpw.TOP_BLOCK[0].id, (byte) 0);
+//        if (hpw.PLOT_BEDROCK) {
+//            reference.fillCuboid(0, 15, 0, 0, 0, 15, 7, (byte) 0);
+//        } else if (hpw.MAIN_BLOCK[0].id == 0 && hpw.TOP_BLOCK[0].id == 0) {
+//            referenceIsVoid = true;
+//        }
+//        reference.fillCuboid(0, 15, 1, hpw.PLOT_HEIGHT - 1, 0, 15, hpw.MAIN_BLOCK[0].id, (byte) 0);
+//        reference.fillCuboid(0, 15, hpw.PLOT_HEIGHT, hpw.PLOT_HEIGHT, 0, 15, hpw.TOP_BLOCK[0].id, (byte) 0);
         return reference;
     }
 
     private void calculateClaimedArea() {
-        ArrayList<Plot> plots = new ArrayList<>(hpw.getPlots());
-        if (ExpireManager.IMP != null) {
-            plots.removeAll(ExpireManager.IMP.getPendingExpired());
-        }
-        for (Plot plot : plots) {
-            Location pos1 = plot.getBottom();
-            Location pos2 = plot.getTop();
-            int ccx1 = pos1.getX() >> 9;
-            int ccz1 = pos1.getZ() >> 9;
-            int ccx2 = pos2.getX() >> 9;
-            int ccz2 = pos2.getZ() >> 9;
-            for (int x = ccx1; x <= ccx2; x++) {
-                for (int z = ccz1; z <= ccz2; z++) {
-                    if (!occupiedRegions.containsKey(x, z)) {
-                        occupiedRegions.add(x, z);
-                        int bcx = x << 5;
-                        int bcz = z << 5;
-                        int tcx = bcx + 32;
-                        int tcz = bcz + 32;
-                        for (int cz = bcz; cz < tcz; cz++) {
-                            for (int cx = bcx; cx < tcx; cx++) {
-                                unoccupiedChunks.add(cx, cz);
-                            }
-                        }
-                    }
-                }
-            }
-            int cx1 = pos1.getX() >> 4;
-            int cz1 = pos1.getZ() >> 4;
-            int cx2 = pos2.getX() >> 4;
-            int cz2 = pos2.getZ() >> 4;
-            for (int cz = cz1; cz <= cz2; cz++) {
-                for (int cx = cx1; cx <= cx2; cx++) {
-                    unoccupiedChunks.remove(cx, cz);
-                }
-            }
-        }
+//        ArrayList<Plot> plots = new ArrayList<>(hpw.getPlots());
+//        if (ExpireManager.IMP != null) {
+//            plots.removeAll(ExpireManager.IMP.getPendingExpired());
+//        }
+//        for (Plot plot : plots) {
+//            Location pos1 = plot.getBottom();
+//            Location pos2 = plot.getTop();
+//            int ccx1 = pos1.getX() >> 9;
+//            int ccz1 = pos1.getZ() >> 9;
+//            int ccx2 = pos2.getX() >> 9;
+//            int ccz2 = pos2.getZ() >> 9;
+//            for (int x = ccx1; x <= ccx2; x++) {
+//                for (int z = ccz1; z <= ccz2; z++) {
+//                    if (!occupiedRegions.containsKey(x, z)) {
+//                        occupiedRegions.add(x, z);
+//                        int bcx = x << 5;
+//                        int bcz = z << 5;
+//                        int tcx = bcx + 32;
+//                        int tcz = bcz + 32;
+//                        for (int cz = bcz; cz < tcz; cz++) {
+//                            for (int cx = bcx; cx < tcx; cx++) {
+//                                unoccupiedChunks.add(cx, cz);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            int cx1 = pos1.getX() >> 4;
+//            int cz1 = pos1.getZ() >> 4;
+//            int cx2 = pos2.getX() >> 4;
+//            int cz2 = pos2.getZ() >> 4;
+//            for (int cz = cz1; cz <= cz2; cz++) {
+//                for (int cx = cx1; cx <= cx2; cx++) {
+//                    unoccupiedChunks.remove(cx, cz);
+//                }
+//            }
+//        }
     }
 
     @Override
